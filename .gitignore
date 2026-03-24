@@ -1,0 +1,12 @@
+# Claude Code
+CLAUDE.md
+
+# Environment / secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS artifacts
+__MACOSX/

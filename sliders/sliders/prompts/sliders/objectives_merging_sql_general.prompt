@@ -1,0 +1,129 @@
+# instruction
+You are a **data cleaning and reconciliation assistant**.
+You are provided with a table, with each row containing values extracted from different pages a document.
+
+Your goal is to perform a specific merge operation to help merge and consolidate the data.
+
+# input 
+Your task is to generate an DuckDB SQL query that will perform this specific merge operation on the table to help complete the task.
+
+Merging rows may each hold fragments of information about the same entity. Follow this principle to reconstruct the most complete and accurate version to ensure the output reflects the true value implied by the document, even when data has been split across rows.
+
+## Operation Definition
+The merge operation is: {{objective_name}}
+{% if objective == "dedup_numerical" %}
+**Numerical Deduplication**
+* Detect duplicate or near-duplicate numeric entries.
+* Keep the most precise value (e.g., "\$1,234,567" instead of "\$1.2M").
+* Prefer numbers directly quoted from the document over approximations.
+
+## Decision Tree
+1. Use the most reliable sources, the quote should contain the explicit value, and the reasoning is should be clear.
+2. If the value is literally written in the document, prefer it over a value that must be computed. Look at reasoning to determine if the value is explicit or inferred.
+3. Keep the value with the greatest resolution (more significant digits, less rounding).
+{% endif %}
+
+{% if objective == "dedup_qualitative" %}
+**Qualitative Deduplication**
+* Detect duplicate or near-duplicate text entries.
+* Standardize variants into a canonical form (e.g., "Google LLC" vs. "Google Inc.").
+* Keep the version most relevant to the question context.
+* Preserve semantic meaning while enforcing consistency.
+
+## Decision Tree
+1. Use the most reliable sources, the quote should contain the explicit value, and the reasoning is should be clear.
+2. If the value is literally written in the document, prefer it over a value that must be inferred. Look at reasoning to determine if the value is explicit or inferred.
+3. Prefer the longer or more detailed wording.
+{% endif %}
+
+{% if objective == "conflict_resolution" %}
+**Conflict Resolution**
+* Identify contradictory values across rows.
+* Examples:
+  * revenue = "$1B" vs. "$1.2B"
+  * is_school = True vs. False
+* Includes cases where one row has missing information and another provides it.
+
+## Decision Tree
+1. Use the most reliable sources, the quote should contain the explicit value, and the reasoning is should be clear.
+2. If the value is literally written in the document, prefer it over a value that must be inferred. Look at reasoning to determine if the value is explicit or inferred.
+{% endif %}
+
+{% if objective == "aggregation" %}
+**Aggregation**
+* Merge rows describing the same entity when each contains different fields.
+* Fill missing fields using information from other rows.
+* Goal: create one complete, unified record.
+
+## Decision Tree
+1. Use the most reliable sources, the quote should contain the explicit value, and the reasoning is should be clear.
+2. If the value is literally written in the document, prefer it over a value that must be inferred. Look at reasoning to determine if the value is explicit or inferred.
+3. For string fields, prefer the longer or more detailed wording. For numerical fields, prefer the most precise value.
+{% endif %}
+
+
+## Important Notes:
+- The query should complete the merge operation {{objective_name}} on the given table {{table_name}} and move the merging process forward.
+- Focus on the specific operation rather than trying to solve all problems at once.
+- Ensure the result maintains data integrity and relevance to the question: {{question}}
+
+Your output should should contain two fields:
+- decision: Using quote and reasoning, make the decision to compute the new value for fields. The decision tells for each field, which rows should be used.
+- sql_query: The SQL query to compute the new value for fields.
+
+You are not allowed to:
+- create a new view. You should output a pure, read-only SQL transformation query.
+- DELETE from table
+If this merge operation is unnecessary, return an empty string as the SQL query.
+
+# Output Format
+
+```python
+class Column(BaseModel):
+    reason: str = PydanticField(description="The reason for the decision to compute the new value for the field.")
+    field_name: str = PydanticField(description="The name of the field that is being computed.")
+    row_ids: list[int] = PydanticField(
+        description="The row ids of the rows that are used to compute the new value for the field."
+    )
+    new_column_name: str = PydanticField(
+        description="After the SQL query is executed, if there is a new column name for the exisiting field, then this should be the name of the new column."
+    )
+
+
+class Decision(BaseModel):
+    reasoning: str = PydanticField(description="The reasoning for the decision to compute the new value for fields.")
+    fields: list[Column] = PydanticField(description="The fields that are being computed and the new values for them.")
+
+
+class Output(BaseModel):
+    decision: Decision = PydanticField(description="The decision to compute the new value for fields.")
+    sql_query: str = PydanticField(description="The SQL query to compute the new value for fields.")
+```
+
+**SQL Dialect: DuckDB**
+
+**Table Name:** {{table_name}}
+
+**Table Data:**
+{{extracted_value_table}}
+
+{% for field in fields %}
+## Field
+Name: {{field.name}}
+Description: {{field.description}}
+Data Type: {{field.data_type}}
+Unit: {{field.unit}}
+{% endfor %}
+
+
+## Original Table
+Do not use this to create a new view/writing sql statements.
+Use this for the quotes and reasonings.
+{{original_table}}
+
+## Your previous actions
+{{actions}}
+
+{% if feedback %}
+Feedback: {{feedback}}
+{% endif %}

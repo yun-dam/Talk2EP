@@ -1,0 +1,19 @@
+# instruction
+You are given a table with some conflicting rows, your goal is to resolve the conflicts and return a single row.
+
+Use the quote and the rationale for each column to resolve the conflicts.
+
+You should output a JSON object with the keys being the column names and the values being the resolved values.
+
+# input
+These are the conflicting column names:
+{{conflicting_column_names}}
+
+Here is the table with the conflicting rows:
+{{conflicting_rows}}
+
+Eventually, the table will be used to answer the following question:
+{{question}}
+
+Here is the schema of the table:
+{{schema}}

@@ -1,0 +1,69 @@
+# instruction
+You are provided with a table containing different fields and their values extracted from different pages of a document.
+Each row contains a unique value extracted from different parts of the document.
+
+Your goal is to combine the values in such a way that they reflect the true value for the document.
+Remember that the final created table will be used to answer the given question. BUT DO NOT ANSWER THE QUESTION.
+
+In the table `quote` and `rationale` are the quote and rationale for extracting the value from the page. Use them to reason about the final value for the field.
+
+`row_id` is the unique identifier for each row in the table.
+`page_number` is the page number of the document where the value was extracted from.
+
+Each field may come from a different (row_id, page_number) pair. Choose the best source independently for every field.
+
+For every field, look at all rows in the table that contain a non-NULL value for that field.  Rank those candidate rows with the following tie-breaker
+ladder; pick the highest-ranked row.  If two or more rows tie at a level, you should combine the values or choose all tied rows.
+
+1. **Target-context match**  
+Does the row’s quote/rationale explicitly reference the same time-frame,
+version, section, or scenario named in the field’s *Guidelines*?  
+(Examples of “context” could be a fiscal year, a reporting period, a
+geological era, a clinical phase, a monarch’s reign, etc.)
+
+2. **Source authority**  
+Prefer data taken directly from the document’s *primary statement/
+definition/measurement* over narrative summaries, sidebars, footnotes, or
+derived calculations.  (No domain jargon—just “primary vs. secondary.”)
+
+3. **Explicit vs. calculated**  
+If the value is literally written in the document, prefer it over a value
+that must be computed—unless the Guidelines *require* a computation.
+
+4. **Precision**  
+For numeric fields, keep the value with the greatest resolution (more
+significant digits, less rounding).  For strings, prefer the longer or more
+detailed wording if the Guidelines favour detail.
+
+5. **Recency or closeness**  
+If no row satisfies steps 1-4 exactly, pick rows whose context is
+*closest in time or sequence* to the target context rather than returning
+NULL.
+
+Your output should should contain two fields:
+- decision: The decision to compute the new value for fields. The decision tells for each field, which rows should be used.
+- sql_query: The SQL query to compute the new value for fields. We are using DuckDB to execute the query.
+
+NEVER create a new view.
+
+# input
+Question: {{question}}
+Sql table name: {{table_name}}
+                
+{{extracted_value_table}}
+
+{% for field in fields %}
+## Field
+Name: {{field.name}}
+Description: {{field.description}}
+Data Type: {{field.data_type}}
+Unit: {{field.unit}}
+
+{% endfor %}
+
+{% if feedback %}
+Feedback: {{feedback}}
+{% endif %}
+
+The final values should help in answering the question: {{question}}
+If you create a view, make sure that the view name is unique.

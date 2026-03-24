@@ -1,0 +1,108 @@
+# instruction
+Given a schema, a question, and a single page, emit rows per table using the schema’s field names/types—and per-field evidence:
+- value (normalized to the field’s unit/scale). If scale is None and the page content says 1.3 billion, then write the value as 1300000000.
+- quote (largest contiguous exact text; list of strings or None)
+- rationale (why this value; include table headers/context if from a table)
+- is_explicit (boolean)
+
+Output guidelines:
+- Produce one row per real item visible on the page (e.g., per counsel-argument, per entity-period-metric).
+- Strictly follow the schema, do not add any new field/key.
+- If the page contains multiple distinct items, output multiple rows.
+- For any field, if the given page does not have any relevant information, set the value and quote to null.
+
+Extraction and Normalization Rules:
+- Page-local only. Use only the current page’s content.
+- Rationale.
+    - Start with rationale, and reason about which parts of the text correspond to the field 
+    - 1–3 sentences: how you located/parsed it; if from a table, include headers and relevant table context.
+    - Note any normalization you performed (e.g., “converted $1.23B to 1230 millions USD”).
+- Normalization is mandatory.
+    - Convert magnitudes into the field’s target scale (e.g., target millions: 1,200,000→1.2; 1.23B→1230).
+    - Convert unit (e.g., currency) to the target if specified; else keep as_is.
+    - Normalize percent per the field’s rule (0_100 vs 0_1) and date per date_format.
+- Type safety. Coerce to the declared data_type; on failure, set value = null.
+- Quote (evidence).
+    - Provide a list with the largest contiguous exact substring that supports the value (often a single element).
+    - Preserve punctuation/case; no ellipses or paraphrase.
+    - If truly not present on the page → quote = null.
+    - Remember if quote is not present, then the value should also be None.
+- is_explicit.
+    - True if the underlying value appears explicitly on the page (including trivial deterministic normalization like unit/scale conversion or parentheses-to-negative).
+    - False if it requires arithmetic beyond normalization (e.g., sums, differences, ratios) or approximations/inference.
+- Duplicates vs distinct items.
+    - Multiple mentions of the same item: choose the most precise/authoritative instance on that page (e.g., structured table over prose).
+    - Distinct items: separate rows.
+
+# Example
+Suppose schema has metric_value (decimal, unit=USD, scale=None) and the page says: “Revenue was $1.23 billion in 2023.”
+
+```JSON
+{
+  "tables": [
+    {
+      "name": "Financials",
+      "rows": [
+        {
+          "fields": {
+            "entity_name": {
+              "rationale": "The page header mentions the information hence I can use it to extract the entity name. Taken from page header.",
+              "value": "Acme Inc.",
+              "quote": ["ACME INC."],
+              "is_explicit": true
+            },
+            "period_end": {
+              "rationale": "The period end is mentioned but it is not in the required format. I need to normalized to YYYY-MM-DD. The period was mentioned in the page title",
+              "value": "2023-12-31",
+              "quote": ["For the year ended December 31, 2023"],
+              "is_explicit": true
+            },
+            "metric_name": {
+              "rationale": "Table 2 mentions the metrics. The Metric label in the caption of the table talking about balance sheet.",
+              "value": "revenue",
+              "quote": ["Revenue"],
+              "is_explicit": true
+            },
+            "metric_forecast": {
+              rationale: "The text mentions the current and past revenue. However, there is no mention of future revenue. Hence I should set the value and quote to None.,
+              "value": null,
+              "quote": null,
+              "is_explicit": false
+            }
+            ,
+            "metric_value": {
+              "rationale": "The revenue is mentioned in in section Commentry. However, it says $1.23 billion. Since the scale is None, I should make it 1230000000. Converted $1.23B to 1230000000 with scale='None', unit='USD'.",
+              "value": 1230,
+              "quote": ["Revenue was $1.23 billion in 2023"],
+              "is_explicit": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+# input
+The following question has been asked by the user. We have already identified the Relationship Schema for answering the question. Now we are extracting information from different pages of the document:
+<Question Start>
+{{question}}
+<Question End>
+
+
+<Document Start>
+# Document Name
+{{document_name}}
+
+# Document Descriptions
+{{document_description}}
+
+# Page Content
+{{document}}
+<Document End>
+
+# Relationship Schema
+{{schema}}
+
+If value for a field is not present in the page, then set the value and quote to null.

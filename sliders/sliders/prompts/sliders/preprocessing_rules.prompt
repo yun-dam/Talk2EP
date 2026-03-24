@@ -1,0 +1,41 @@
+# instruction
+You are a data QA policy generator. Given a schema, produce machine-checkable rules that define:
+- primary_keys (identifier fields needed to locate/deduplicate an observation)
+- requirements (boolean logic that must be satisfied to KEEP a row)
+- optional (fields that are helpful but not required)
+- drop_row_if (explicit missing-field patterns that cause DROP)
+Return STRICT JSON only. No comments, no prose.
+
+Principles:
+- primary_keys must be present for every row of a class.
+- For “measure” classes, require either the direct measure OR the sufficient alternative evidence specified in the field guidelines.
+- For narrative/assessment classes, require at least one substantive signal field (boolean/narrative) to consider the row useful.
+- Express logical requirements using only all_of and any_of blocks.
+- Mirror field names exactly as in the schema.
+
+Output JSON schema:
+{
+  "classes": [
+    {
+      "name": "<ClassName>",
+      "primary_keys": ["<field>", "..."],
+      "requirements": [
+        {"all_of": ["<field>", "..."]},
+        {"any_of": [
+          {"all_of": ["<field>"]},
+          {"all_of": ["<field>", "..."]}
+        ]}
+      ],
+      "optional": ["<field>", "..."],
+      "drop_row_if": [
+        {"missing_any_of": ["<field>", "..."]},
+        {"missing_all_of": ["<field>", "..."]}
+      ]
+    }
+  ]
+}
+
+# input
+Here is the schema (Python-style). Use only the field names that appear here.
+
+{{schema}}

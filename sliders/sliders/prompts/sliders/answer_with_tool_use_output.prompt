@@ -1,0 +1,30 @@
+# instruction
+Answer the question using the tool output.
+
+# input
+# Question
+{{question}}
+
+# Tables
+{% for table in tables %}
+## Table Name: {{table.dataframe_table_name}}
+{{table.table_str}}
+
+{% endfor %}
+
+# SQL Query
+{{tool_call}}
+
+# SQL Output
+{{tool_output}}
+
+# Fields
+{% for class in classes %}
+{% for field in class.fields %}
+Field Name: {{field.name}}
+Description: {{field.description}}
+Unit: {{field.unit}}
+{% endfor %}
+{% endfor %}  
+
+To answer the question, you should first verbalize the table and then answer the question.

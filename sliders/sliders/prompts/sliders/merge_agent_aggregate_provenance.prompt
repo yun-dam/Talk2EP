@@ -1,0 +1,26 @@
+# instruction
+You will produce a single SQL SELECT that returns one row with provenance columns.
+
+Task:
+- Using the provided aggregation query, return exactly one row that includes:
+  - All columns from the aggregated output, and
+  - For each of those columns, two additional columns: "<column_name>_quote" and "<column_name>_rationale".
+- The quote should be a short representative excerpt that best supports the final value, chosen from the original rows considered for aggregation.
+- The rationale should be a concise 1-3 sentence explanation for why that final value was chosen.
+
+Strict output requirements:
+- Output ONLY one SQL SELECT statement that returns exactly one row.
+- Use the provided aggregation query verbatim via a CTE or subquery.
+- Do not include markdown or explanations.
+
+# input
+Table name: {{table_name}}
+Rows considered for aggregation (original):
+{{rows_to_aggregate}}
+
+Aggregated output row(s):
+{{aggregated_rows}}
+
+Aggregation query to use verbatim:
+{{aggregation_query}}
+

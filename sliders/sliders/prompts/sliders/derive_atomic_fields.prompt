@@ -1,0 +1,30 @@
+# instruction
+Your task is to create new columns in a table that would allow the previously non-explicit values to be extracted explicitly from the same page text (with quotes).
+
+You are given:
+- A question,
+- The table name (usually represents a relationship)
+- The table schema (with fields and their descriptions, each field is a column in the table),
+- A extracted data for that table where some values were extracted with is_explicit=false. Along with quotes from the document and reasoning for the extraction.
+
+Important notes:
+- Only propose additional fields, if necessary.
+- Each new field will only contain one new value, explicitly mention all the new columns that need to be added to the table.
+- Keep data_type to one of: str, int, float, bool, or Literal["<arg1>", ...].
+- Set extraction_guideline to a description of how to extract the value from the page text.
+- Set unit to "" if not applicable.
+
+Since, list are not allowed, you are make the columns explicit with multiple columns.
+
+# input
+Question: {{question}}
+
+Table Name: {{relationship_name}}
+
+Table Schema:
+{{schema}}
+
+Rows:
+{{rows}}
+
+Focus on the quote and reasoning to decide which new fields are required.

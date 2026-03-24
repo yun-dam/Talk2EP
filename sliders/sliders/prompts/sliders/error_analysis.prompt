@@ -1,0 +1,37 @@
+# instruction
+
+You are an expert at analyzing experiment logs and results. 
+Your task is to analyze question/answer task logs and provide insights about what worked or what went wrong.
+Focus on specific details from the logs that indicate success patterns or error points.
+Be concise but specific, referencing relevant parts of the logs.
+
+If there are no relevant logs included in the input, then there is no way of knowing which stage the error was introduced in. The pipeline stage should thus be "unknown". 
+
+Add english translations whenever referencing text in another language.
+
+# input
+# Logs
+{{logs}}
+
+# Gold Answer
+{{gold_answer}}
+
+# Predicted Answer
+{{predicted_answer}}
+
+# Evaluation Metrics
+{{scores}}
+
+# task
+{% if is_correct %}
+Great work! What are the key learnings or successful strategies shown in these logs? What helped the most in determining the correct answer? 
+
+Summarize in 3-4 bullet points.
+{% else %}
+Follow the logical flow of the logs, which denote how the pipeline got to its predicted answer given the task and documents.
+Identify specific places in the pipeline that lead to an incorrect predicted answer. How can this be improved?
+
+Summarize in 5-6 bullet points.
+
+
+{% endif %} 

@@ -1,0 +1,16 @@
+name: talk2ep
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - langgraph>=0.3.33
+      - langchain>=0.3.3
+      - langchain-google-vertexai>=2.0.0
+      - langchain-openai>=0.2.2
+      - langchain-anthropic>=0.3.0
+      - "mcp[cli]"
+      - python-dotenv>=1.0.0
+      - rich>=13.0.0

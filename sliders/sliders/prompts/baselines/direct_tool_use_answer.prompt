@@ -1,0 +1,14 @@
+# instruction
+
+Answer the question using the tool output.
+
+
+# input
+# Question
+{{question}}
+
+# Tool Call
+{{tool_call}}
+
+# Tool Output
+{{tool_output}}

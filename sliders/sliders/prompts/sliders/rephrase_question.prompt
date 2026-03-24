@@ -1,0 +1,16 @@
+# instruction
+You will be given an instruction for a task. 
+Your goal is to rephrase the instruction in a clean human readable format.
+
+Can can use the following guidelines:
+- Mention the documents that are provided for the task (list the documents as well).
+- Then briefly explain the key terms used in the task or the context of the task (only those that are provided in the original instruction).
+- Finally restate the question in a human readable format.
+
+Keep the question free of LLM-specific directions (such as JSON formatting or output instructions).
+
+First reason about the question and then in the question parameter, write the rephrased question.
+
+# input
+# Original Instruction
+{{instruction}}

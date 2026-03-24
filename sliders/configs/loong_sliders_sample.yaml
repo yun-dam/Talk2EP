@@ -1,0 +1,82 @@
+experiment: loong
+system: sliders
+system_config:
+  generate_task_guidelines: false
+  rephrase_question: false
+  generate_schema:
+    add_extra_information_class: false
+  extract_schema:
+    decompose_fields: false
+    dedupe_merged_rows: false
+    num_samples_per_chunk: 1
+  merge_tables:
+    merge_strategy: seq_agent
+  models:
+    answer:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    answer_no_table:
+      model: gpt-4.1-mini
+      max_tokens: 8192
+      temperature: 0.0
+    answer_tool_output:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    extract_schema:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    generate_schema:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    merge_tables:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    task_guidelines:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    check_objective_necessity:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    rephrase_question:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    direct_answer:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    force_answer:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+    is_relevant_chunk:
+      model: gpt-4.1-mini
+      max_tokens: 8192
+      temperature: 0.0
+    check_if_merge_needed:
+      model: gpt-4.1
+      max_tokens: 8192
+      temperature: 0.0
+experiment_config:
+  benchmark_path: /data1/hypothesis_dataset/loong/loong_processed.jsonl
+  gpt_results_path: /data1/hypothesis_dataset/loong/results/gpt-4_oracle_reverse.jsonl
+  files_dir: /data1/hypothesis_dataset/loong/doc/
+  soft_evaluator_model: gpt-4.1
+  hard_evaluator_model: gpt-4.1
+  specific_ids_csv: /data1/hypothesis_dataset/loong/50_sample_ids.csv
+  num_questions: 50
+  random_state: 42
+  document_config:
+    chunk_size: 16000
+    overlap_size: 0
+  # filter_by_type: "paper"
+  # filter_by_level: 3
+  # Priority: if specific_ids_csv is provided, it takes precedence over type/level filters
+output_file: loong_sliders_50_sample_seq_agent_nl_no_rephrase.json

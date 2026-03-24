@@ -1,0 +1,18 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\yunda\\anaconda3\\envs\\talk2ep\\python.exe",
+    "python.terminal.activateEnvironment": false,
+    "python.venvFolders": [],
+    "python.venvPath": "",
+    "python.autoDetect.venvFolders": false,
+    "python.experiments.enabled": false,
+    "search.exclude": {
+        "**/.venv": true
+    },
+    "terminal.integrated.profiles.windows": {
+        "talk2ep": {
+            "path": "cmd.exe",
+            "args": ["/K", "conda activate talk2ep"]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "talk2ep"
+}

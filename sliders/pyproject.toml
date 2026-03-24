@@ -1,0 +1,57 @@
+[project]
+name = "sliders"
+version = "0.1.0"
+description = "Scalable Question Answering on Long Documents with Divide-and-Conquer"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=0.6.3",
+    "docling>=1.20.0",
+    "fire>=0.7.0",
+    "json-repair>=0.30.1",
+    "jupyter>=1.1.1",
+    "langchain-community>=0.3.2",
+    "langchain-openai>=0.2.2",
+    "langchain-google-vertexai>=2.0.0",
+    "langchain>=0.3.3",
+    "loguru>=0.7.2",
+    "matplotlib>=3.9.2",
+    "motor>=3.6.0",
+    "psycopg2-binary>=2.9.10",
+    "pypdf2>=3.0.1",
+    "pytest>=8.3.4",
+    "redis>=5.2.0",
+    "rich>=13.9.4",
+    "scikit-learn>=1.6.1",
+    "seaborn>=0.13.2",
+    "sentence-transformers>=3.3.1",
+    "streamlit>=1.32.0",
+    "tiktoken>=0.8.0",
+    "toml>=0.10.2",
+    "transformers>=4.46.3",
+    "suql==1.1.8",
+    "ipdb>=0.13.13",
+    "langgraph>=0.3.33",
+    "markdown>=3.8",
+    "marko>=2.1.3",
+    "html5lib>=1.1",
+    "accelerate>=1.6.0",
+    "duckdb>=1.2.2",
+    "retry>=0.9.2",
+    "gradio>=5.34.0",
+    "black>=25.1.0",
+    "pre-commit>=4.3.0",
+    "rapidfuzz>=3.14.0",
+    "nltk>=3.9.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sliders"]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4

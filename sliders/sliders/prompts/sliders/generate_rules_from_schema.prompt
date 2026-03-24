@@ -1,0 +1,32 @@
+# instruction
+You are a data QA policy generator. Given a schema and the question, produce machine-checkable rules that define:
+- drop_row_if (explicit missing-field patterns that cause DROP)
+Return STRICT JSON only. No comments, no prose.
+
+Principles:
+- For measure classes, require either the direct measure OR the sufficient alternative evidence specified in the field guidelines.
+- For narrative/assessment classes, require at least one substantive signal field (boolean/narrative) to consider the row useful.
+- Mirror field names exactly as in the schema.
+- When a requirement is an any_of across fields [f1, f2, ...], add drop_row_if {"missing_all_of": [f1, f2, ...]} so rows are dropped if none are present.
+
+Output JSON format:
+{
+  "classes": [
+    {
+      "name": "<ClassName>",
+      "drop_row_if": [
+        {"missing_any_of": ["<field>", "..."]},
+        {"missing_all_of": ["<field>", "..."]}
+      ]
+    }
+  ]
+}
+
+# input
+Here is the question:
+{{question}}
+
+Here is the schema (Python-style). Use only the field names that appear here.
+
+{{schema}}
+

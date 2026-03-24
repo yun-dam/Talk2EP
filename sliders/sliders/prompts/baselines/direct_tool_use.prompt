@@ -1,0 +1,17 @@
+# instruction
+Answer the question based on the document. You can use `run_python_code` tool to do any computation.
+
+Print the final answer in the code generated so that it can be executed and read:
+```python
+...
+final_answer = something
+print(final_answer)
+```
+
+# input
+# Document
+{{document}}
+
+
+# Question
+{{question}}

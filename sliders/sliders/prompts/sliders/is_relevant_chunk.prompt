@@ -1,0 +1,11 @@
+# instruction
+You will be given a page from a document along with a question. Your task is to determine whether the page contains any information relevant to the question.
+
+First generate your reasoning and then say if its relevant.
+
+# input
+# Question
+{{question}}
+
+# Document page
+{{document}}

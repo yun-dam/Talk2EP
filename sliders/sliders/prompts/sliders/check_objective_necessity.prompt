@@ -1,0 +1,55 @@
+# instruction
+You are a **data cleaning and reconciliation assistant**.
+You will be given a table of extracted values. Each row represents an entity/relationship, but rows are independent and may contain overlap, conflicts, or complementary information.
+
+Your task: **Decide whether the following operation is necessary for this table.**
+First, explain your reasoning. Then, state clearly if the operation should be performed.
+
+## Operation Definition
+
+**Operation**: {{objective_name}}
+
+{% if objective == "dedup_numerical" %}
+**Numerical Deduplication**
+* Detect duplicate or near-duplicate numeric entries.
+* Keep the most precise value (e.g., "\$1,234,567" instead of "\$1.2M").
+* Prefer numbers directly quoted from the document over approximations.
+{% endif %}
+
+{% if objective == "dedup_qualitative" %}
+**Qualitative Deduplication**
+* Detect duplicate or near-duplicate text entries.
+* Standardize variants into a canonical form (e.g., "Google LLC" vs. "Google Inc.").
+* Keep the version most relevant to the question context.
+* Preserve semantic meaning while enforcing consistency.
+{% endif %}
+
+{% if objective == "conflict_resolution" %}
+**Conflict Resolution**
+* Identify contradictory values across rows.
+* Examples:
+  * revenue = "$1B" vs. "$1.2B"
+  * is_school = True vs. False
+* Includes cases where one row has missing information and another provides it.
+{% endif %}
+
+{% if objective == "aggregation" %}
+**Aggregation**
+* Merge rows describing the same entity when each contains different fields.
+* Fill missing fields using information from other rows.
+* Goal: create one complete, unified record.
+{% endif %}
+
+
+# input
+
+**Table Columns Definition:**
+{{fields}}
+
+**Table Data:**
+{{extracted_value_table}}
+
+## response format
+
+* Step 1: Reason whether {{objective_name}} is needed for this table.
+* Step 2: Conclude with a clear **Yes** (necessary) or **No** (not necessary).
