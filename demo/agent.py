@@ -9,6 +9,7 @@ Builds a tool-calling agent that can:
 
 from __future__ import annotations
 
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 
 from config import get_orchestrator_llm, SAMPLE_FILES_DIR
@@ -66,10 +67,12 @@ CONSTRAINTS
 
 
 def build_agent():
-    """Return a compiled LangGraph ReAct agent."""
+    """Return a compiled LangGraph ReAct agent with memory for multi-turn conversations."""
     llm = get_orchestrator_llm()
+    memory = MemorySaver()
     return create_react_agent(
         model=llm,
         tools=ALL_TOOLS,
         prompt=SYSTEM_PROMPT,
+        checkpointer=memory,
     )

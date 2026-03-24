@@ -8,5 +8,11 @@ CLAUDE.md
 __pycache__/
 *.pyc
 
+# ChromaDB vector store
+.chroma/
+
+# Virtual environments
+.venv/
+
 # macOS artifacts
 __MACOSX/

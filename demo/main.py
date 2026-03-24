@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+import uuid
 from pathlib import Path
 
 from rich.console import Console
@@ -54,7 +55,7 @@ def print_agent_message(text: str):
 
 # ── Agent invocation ──────────────────────────────────────────────────────
 
-async def run_agent_query(agent, query: str):
+async def run_agent_query(agent, query: str, config: dict):
     """Stream the agent's response, printing tool calls and final answer."""
     console.print(f"\n[bold green]You:[/bold green] {query}")
     console.print("[dim]--- thinking ---[/dim]")
@@ -63,7 +64,7 @@ async def run_agent_query(agent, query: str):
     final_text = ""
 
     try:
-        async for event in agent.astream_events(inputs, version="v2"):
+        async for event in agent.astream_events(inputs, version="v2", config=config):
             kind = event.get("event", "")
             if kind == "on_tool_start":
                 print_tool_call(event["name"], event.get("data", {}).get("input", {}))
@@ -75,7 +76,7 @@ async def run_agent_query(agent, query: str):
         console.print(f"[red]Streaming error: {e}[/red]")
         # Fallback: non-streaming
         try:
-            result = await agent.ainvoke(inputs)
+            result = await agent.ainvoke(inputs, config=config)
             for msg in reversed(result["messages"]):
                 if hasattr(msg, "content") and msg.content and msg.type == "ai":
                     final_text = msg.content
@@ -90,10 +91,9 @@ async def run_agent_query(agent, query: str):
 
 # ── Conversation loop ─────────────────────────────────────────────────────
 
-async def repl(agent):
-    """Read-Eval-Print loop with conversation history."""
+async def repl(agent, config: dict):
+    """Read-Eval-Print loop with conversation history (managed by checkpointer)."""
     print_banner()
-    history: list = []
 
     while True:
         try:
@@ -108,14 +108,14 @@ async def repl(agent):
             console.print("[dim]Goodbye![/dim]")
             break
 
-        history.append(("user", query))
-        inputs = {"messages": list(history)}
+        # Only send the new user message — the checkpointer retains history
+        inputs = {"messages": [("user", query)]}
 
         console.print("[dim]--- thinking ---[/dim]")
         final_text = ""
 
         try:
-            async for event in agent.astream_events(inputs, version="v2"):
+            async for event in agent.astream_events(inputs, version="v2", config=config):
                 kind = event.get("event", "")
                 if kind == "on_tool_start":
                     print_tool_call(
@@ -129,7 +129,7 @@ async def repl(agent):
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
             try:
-                result = await agent.ainvoke(inputs)
+                result = await agent.ainvoke(inputs, config=config)
                 for msg in reversed(result["messages"]):
                     if hasattr(msg, "content") and msg.content and msg.type == "ai":
                         final_text = msg.content
@@ -140,7 +140,6 @@ async def repl(agent):
 
         if final_text:
             print_agent_message(final_text)
-            history.append(("assistant", final_text))
 
 
 # ── Entry point ───────────────────────────────────────────────────────────
@@ -166,12 +165,15 @@ async def async_main(query: str | None = None):
     agent = build_agent()
     console.print("[green]Agent ready.[/green]\n")
 
+    # Thread config — keeps conversation state across turns via checkpointer
+    config = {"configurable": {"thread_id": uuid.uuid4().hex}}
+
     # 3. Run
     try:
         if query:
-            await run_agent_query(agent, query)
+            await run_agent_query(agent, query, config)
         else:
-            await repl(agent)
+            await repl(agent, config)
     finally:
         # 4. Clean shutdown
         console.print("[dim]Disconnecting MCP server...[/dim]")
